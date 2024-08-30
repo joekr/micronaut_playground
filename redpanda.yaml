@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redpanda
+  namespace: dtss
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redpanda
+  template:
+    metadata:
+      labels:
+        app: redpanda
+    spec:
+      containers:
+      - name: redpanda
+        image: vectorized/redpanda:latest
+        ports:
+        - containerPort: 9092
+          name: kafka
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redpanda-service
+  namespace: dtss
+spec:
+  selector:
+    app: redpanda
+  ports:
+    - protocol: TCP
+      port: 9092
+      targetPort: 9092

@@ -1,0 +1,80 @@
+# Ignore build outputs
+/build/
+/out/
+
+# Gradle-specific files
+.gradle/
+/gradle/
+/!gradle/wrapper/gradle-wrapper.jar
+/.gradle
+/gradle/wrapper/gradle-wrapper.properties
+
+# Ignore IDE specific files (common IDEs listed)
+# IntelliJ IDEA
+/.idea/
+/*.iml
+*.iws
+*.ipr
+
+# Eclipse
+/.project
+/.classpath
+/.settings/
+/*.launch
+
+# VS Code
+/.vscode/
+
+# NetBeans
+/nbproject/private/
+/build/
+/nbbuild/
+/dist/
+/nbdist/
+/nbactions.xml
+/nb-configuration.xml
+
+# Mac specific files
+.DS_Store
+
+# Windows specific files
+Thumbs.db
+*.class
+
+# Log files
+*.log
+
+# Ignore JAR and WAR files
+*.jar
+*.war
+*.rar
+*.zip
+
+# Ignore application secrets and environment files
+.env
+.env.local
+.env.*.local
+
+# Ignore IntelliJ IDEA specific files
+.idea/
+/*.iml
+*.ipr
+*.iws
+
+# Ignore temporary files
+*~
+*.swp
+*.swo
+*.bak
+*.tmp
+*.orig
+
+# Ignore coverage reports
+/coverage/
+/jacoco/
+
+# Micronaut specific (native image)
+*.native-image/
+
+# Ignore Docker files that shouldn't be versioned
+docker-compose.override.yml
