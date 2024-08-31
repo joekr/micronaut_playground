@@ -12,6 +12,7 @@ repositories {
 }
 
 dependencies {
+    implementation(platform("io.micronaut.platform:micronaut-platform"))
     annotationProcessor("io.micronaut:micronaut-http-validation")
     annotationProcessor("io.micronaut.serde:micronaut-serde-processor")
     implementation("io.micronaut.serde:micronaut-serde-jackson")
@@ -19,10 +20,11 @@ dependencies {
     implementation("org.ektorp:org.ektorp:1.4.4")
     implementation("javax.inject:javax.inject:1")
     implementation("io.micronaut:micronaut-http-client")
-    implementation("javax.validation:validation-api:2.0.1.Final")
-    implementation("org.hibernate.validator:hibernate-validator:6.2.0.Final")
+    implementation(project(":common-library"))
     implementation("javax.annotation:javax.annotation-api")
     implementation("io.projectreactor:reactor-core:3.5.0")
+    implementation("javax.validation:validation-api:2.0.1.Final")
+    implementation("org.hibernate.validator:hibernate-validator:6.2.0.Final")
     runtimeOnly("ch.qos.logback:logback-classic")
     testImplementation("io.micronaut:micronaut-http-client")
 }

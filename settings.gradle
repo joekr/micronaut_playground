@@ -1,0 +1,5 @@
+rootProject.name = 'dtss-service'
+
+include 'api'
+include 'worker'
+include 'common-library'

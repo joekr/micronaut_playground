@@ -36,6 +36,9 @@ kubectl create namespace dtss
 
 #### API
 
+to run from root `./gradlew :worker:run`
+
+or in the api dir
 ```
 make
 
