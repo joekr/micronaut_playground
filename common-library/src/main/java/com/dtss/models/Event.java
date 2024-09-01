@@ -1,4 +1,4 @@
-package com.dtss.record;
+package com.dtss.models;
 
 import io.micronaut.core.annotation.Introspected;
 import javax.validation.constraints.NotBlank;
@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 import io.micronaut.serde.annotation.Serdeable;
 
-@Serdeable.Deserializable
+@Serdeable
 @Introspected
 public record Event(
     @NotBlank String id,

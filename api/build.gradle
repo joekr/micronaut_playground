@@ -16,6 +16,8 @@ dependencies {
     annotationProcessor("io.micronaut:micronaut-http-validation")
     annotationProcessor("io.micronaut.serde:micronaut-serde-processor")
     implementation("io.micronaut.serde:micronaut-serde-jackson")
+    implementation("io.micronaut:micronaut-jackson-databind")
+    implementation("com.fasterxml.jackson.core:jackson-databind")
     implementation("io.micronaut.kafka:micronaut-kafka")
     implementation("org.ektorp:org.ektorp:1.4.4")
     implementation("javax.inject:javax.inject:1")
