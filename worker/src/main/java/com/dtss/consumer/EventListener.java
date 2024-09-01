@@ -6,8 +6,10 @@ import io.micronaut.http.HttpResponse;
 import io.netty.buffer.ByteBuf;
 import jakarta.inject.Inject;
 import reactor.core.publisher.Mono;
+import reactor.util.retry.Retry;
 
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,7 +30,15 @@ public class EventListener {
         LOG.info("Received eventId: {}", eventId);
 
         Mono<HttpResponse<?>> dbResponse = couchDbService.getDocument("event", eventId);
-        dbResponse.subscribe(r-> {
+        dbResponse.retryWhen(Retry.fixedDelay(3, Duration.ofSeconds(2))
+                .doBeforeRetry(retrySignal -> 
+                    System.out.println("Retrying due to: " + retrySignal.failure().getMessage()))
+            )
+            .doOnError(throwable -> {
+                // Log the error or handle it appropriately after all retries have been exhausted
+                System.err.println("Operation failed after retries: " + throwable.getMessage());
+            })
+        .subscribe(r-> {
             System.out.println(Mono.just(r.body()));
                 // Extract the body from the HttpResponse
                 ByteBuffer<?> byteBuffer = (ByteBuffer<?>) r.body();
