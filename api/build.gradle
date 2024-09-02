@@ -21,6 +21,7 @@ dependencies {
     implementation("io.micronaut.kafka:micronaut-kafka")
     implementation("org.ektorp:org.ektorp:1.4.4")
     implementation("javax.inject:javax.inject:1")
+    implementation("com.bucket4j:bucket4j-core:8.10.1")
     implementation("io.micronaut:micronaut-http-client")
     implementation(project(":common-library"))
     implementation("javax.annotation:javax.annotation-api")

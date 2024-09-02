@@ -6,17 +6,23 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.dtss.producers.EventProducer;
+import com.dtss.annotation.RateLimited;
+import com.dtss.interceptor.RateLimitingInterceptor;
 import com.dtss.models.Event;
 import com.dtss.service.CouchDbService;
 
+import io.micronaut.aop.InterceptorBinding;
 import io.micronaut.core.io.buffer.ByteBuffer;
 import io.micronaut.http.HttpResponse;
 import io.micronaut.http.HttpStatus;
 import io.micronaut.http.MediaType;
+import io.micronaut.http.MutableHttpResponse;
 import io.micronaut.http.annotation.Body;
 import io.micronaut.http.annotation.Controller;
 import io.micronaut.http.annotation.Get;
 import io.micronaut.http.annotation.Post;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.netty.buffer.ByteBuf;
 import jakarta.inject.Inject;
@@ -36,31 +42,24 @@ public class EventController {
     @Inject
     ObjectMapper objectMapper;
     
+    @RateLimited
     @Get(produces = MediaType.APPLICATION_JSON)
     public Map<String, String> getApi(){
         return Map.of("message", "Hello, World!", "status", "success");
     }
 
+    @RateLimited(capacity = 100, refillTokens = 10, refillDurationSeconds = 10)
     @Post(consumes = MediaType.APPLICATION_JSON, produces = MediaType.APPLICATION_JSON)
-    public HttpResponse<Map<String, String>> createExample(@Valid @Body Event event) {
-        // Process the input data
+    public Mono<MutableHttpResponse<Map<String, String>>> createExample(@Valid @Body Event event) {
         String name = event.name();
 
-        // Prepare the response data
-        Map<String, String> response = Map.of("message", "Hello, " + name + "!", "status", "created");
+        Map<String, String> response = Map.of("created " + name + " event", "created");
 
-
-        try{
-            Mono<HttpResponse<?>> dbResponse = couchDbService.saveDocument("event", event.toMap());
-            dbResponse.retryWhen(Retry.fixedDelay(3, Duration.ofSeconds(2))
+        return couchDbService.saveDocument("event", event.toMap())
+            .retryWhen(Retry.fixedDelay(3, Duration.ofSeconds(2))
             .doBeforeRetry(retrySignal -> 
                 System.out.println("Retrying due to: " + retrySignal.failure().getMessage()))
-        )
-        .doOnError(throwable -> {
-            // Log the error or handle it appropriately after all retries have been exhausted
-            System.err.println("Operation failed after retries: " + throwable.getMessage());
-        })
-        .subscribe(r-> {
+            ).map(r-> {
                 System.out.println(Mono.just(r.body()));
                 // Extract the body from the HttpResponse
                 ByteBuffer<?> byteBuffer = (ByteBuffer<?>) r.body();
@@ -74,20 +73,16 @@ public class EventController {
 
                 try {
                     Event dbEvent = objectMapper.readValue(jsonString, Event.class);
-    
                     String eventId = dbEvent.id();
                     System.out.println("Event ID: " + eventId);
-    
-                    eventProducer.sendEvent(eventId);
-                } catch (Exception e) {
-                    System.err.println("Error deserializing response: " + e.getMessage());
-                }
-            });
-        } catch (Exception e) {
-            System.out.println(e);
-        }
 
-        // Return a response with a custom status code
-        return HttpResponse.created(response);
+                    eventProducer.sendEvent(eventId);
+                } catch (JsonProcessingException e) {
+                    System.err.println("Error deserializing response: " + e.getMessage());
+                    return HttpResponse.<Map<String, String>>serverError(Map.of("error", "Failed to process event"));
+                }
+
+                return HttpResponse.created(response);
+            }).onErrorReturn(HttpResponse.serverError(Map.of("error", "Operation failed after retries")));
     }
 }
