@@ -14,14 +14,18 @@ public record Event(
     @NotBlank String id,
     @NotBlank String name,
     @NotNull LocalDateTime timestamp,
-    String description
+    @NotNull Boolean processed,
+    String description,
+    String revision
 ) {
         public Map<String, Object> toMap() {
         Map<String, Object> map = new HashMap<>();
         map.put("_id", id);
+        map.put("_rev", revision);
         map.put("name", name);
         map.put("timestamp", timestamp.toString());
         map.put("description", description);
+        map.put("processed", processed);
         return map;
     }
 }

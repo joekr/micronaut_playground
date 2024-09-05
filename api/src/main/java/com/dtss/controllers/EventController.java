@@ -4,6 +4,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import com.dtss.producers.EventProducer;
 import com.dtss.annotation.RateLimited;
@@ -53,9 +54,20 @@ public class EventController {
     public Mono<MutableHttpResponse<Map<String, String>>> createExample(@Valid @Body Event event) {
         String name = event.name();
 
+        if (event.id() == null || event.id().isBlank()) {
+            event = new Event(
+                UUID.randomUUID().toString(),
+                event.name(),
+                event.timestamp(),
+                event.processed() == null ? false : event.processed(), // Default to false if null
+                event.description(),
+                null // No revision since it's a new document
+            );
+        }
+
         Map<String, String> response = Map.of("created " + name + " event", "created");
 
-        return couchDbService.saveDocument("event", event.toMap())
+        return couchDbService.createDocument(event.toMap())
             .retryWhen(Retry.fixedDelay(3, Duration.ofSeconds(2))
             .doBeforeRetry(retrySignal -> 
                 System.out.println("Retrying due to: " + retrySignal.failure().getMessage()))
